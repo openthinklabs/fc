@@ -1,0 +1,17 @@
+{
+    "name": "uvdesk/form-component",
+    "description": "Configure your forms with the form component custom field for uvdesk community helpdesk system.",
+    "type": "uvdesk-module",
+    "authors": [
+        {
+            "name": "Sanjeev Papnoi",
+            "email": "sanjeevpapnoi829@webkul.com"
+        }
+    ],
+    "autoload": {
+        "UVDesk\\CommunityPackages\\UVDesk\\FormComponent\\": "src/"
+    },
+    "package": {
+        "UVDesk\\CommunityPackages\\UVDesk\\FormComponent\\FormComponentPackage": ["all"]
+    }
+}

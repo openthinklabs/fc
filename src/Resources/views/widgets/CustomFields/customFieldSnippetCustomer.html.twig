@@ -1,0 +1,352 @@
+<style>
+    .uv-date-picker {
+        width: 100%;
+    }
+
+    form[name="customFieldForm"] {
+        padding-right: 20px !important;
+    }
+
+    .uv-rtl form[name="customFieldForm"] {
+        padding-right: 0px !important;
+        padding-left: 20px !important;
+    }
+
+    .cfield-manage-pta {
+        right: 20px;
+    }
+
+    .uv-rtl .cfield-manage-pta {
+        right: unset;
+        left: 20px;
+    }
+</style>
+
+<script type="text/template" id="customfield-view-node-template">
+    <% if (ticketCustomField.encrypted == false) { %>
+        <% if (_.contains(['text', 'textarea', 'date', 'datetime', 'time'], customField.fieldType)) { %>
+           <% print('<span class="uv-pre-line">' + nl2br(ticketCustomField.value) + '</span>') %>
+        <% } else if (_.contains(['select', 'radio'], customField.fieldType)) { %>
+            <% print('<span>' + ticketCustomField.value + '</span>') %>
+        <% } else if (customField.fieldType == 'checkbox') { %>
+            <% print('<span>' + ticketCustomField.value + '</span>') %>
+        <% } else if (customField.fieldType == 'file') { %>
+            <% try { %>
+                <% var fileData = ticketCustomField.value.indexOf('&quot') !== -1
+                                ? $.parseJSON(ticketCustomField.value.replace(/&quot;/g,'"')) 
+                                : $.parseJSON(ticketCustomField.value); 
+                %>
+
+                <% if (fileData.hasOwnProperty('id') && fileData.hasOwnProperty('path') && fileData.hasOwnProperty('name')) { %>
+                    <% print('<span><a href="{{ path('helpdesk_customer_download_ticket_attachment') }}/' + fileData.id + '" target="_blank">') %>
+                    <% print('<i class="fa fa-file"></i>' + fileData.name) %>
+                    <% print('</a></span>') %>
+                <% } else { %>
+                    <% print('<span><a href="' + decodeURIComponent(ticketCustomField.value) + '" target="_blank">') %>
+                    <% print('<i class="fa fa-file"></i>' + decodeURIComponent(ticketCustomField.value).split('/').pop() ) %>
+                    <% print('</a></span>') %>
+                <% } %>
+            <% } catch (e) { %>
+                <% print('<span><a href="' + decodeURIComponent(ticketCustomField.value) + '" target="_blank">') %>
+                <% print('<i class="fa fa-file"></i>' + decodeURIComponent(ticketCustomField.value).split('/').pop() ) %>
+                <% print('</a></span>') %>
+            <% } %>
+        <% } %>
+    <% } else { %>
+        <div class="access-field" style="cursor: pointer;"><span>{{ 'Click to view'|trans }}</span></div>
+    <% } %>
+</script>
+
+<script type="text/template" id="customfield-edit-node-template">
+    <% if (customField.fieldType == 'text') { %>
+        <input type="text" name="<% print('customFields[' + customField.id + ']') %>" value="<% if (typeof(ticketCustomField) != 'undefined' && ticketCustomField.hasOwnProperty('id')) print(nl2br(ticketCustomField.value, '')) %>" class="uv-field" placeholder="<% print(customField.value) %>" />
+    <% } else if (customField.fieldType == 'textarea') { %>
+        <textarea name="<% print('customFields[' + customField.id + ']') %>" class="uv-field" placeholder="<% print(customField.value); %>"><% if (typeof(ticketCustomField) != 'undefined' && ticketCustomField.hasOwnProperty('id')) { print(nl2br(ticketCustomField.value, '')) } %></textarea>
+    <% } else if (customField.fieldType == 'select') { %>
+        <select class="uv-select" name="<% print('customFields[' + customField.id + ']') %>">
+            <% _.each(customField.customFieldValues, function(option) { %>
+                <% if (typeof(ticketCustomField) != 'undefined' && ticketCustomField.hasOwnProperty('valueId')) { %>
+                    <% if (_.contains(ticketCustomField.valueId, option.id)) { %>
+                        <option value="<% print(option.id) %>" selected><% print(option.name) %></option>
+                    <% } else { %>
+                        <option value="<% print(option.id) %>"><% print(option.name) %></option>
+                    <% } %>
+                <% } else { %>
+                    <option value="<% print(option.id) %>"><% print(option.name) %></option>
+                <% } %>
+            <% }); %>
+        </select>
+    <% } else if (customField.fieldType == 'radio') { %>
+        <% _.each(customField.customFieldValues, function(radio) { %>
+            <div class="uv-field-block">
+                <label>
+                    <div class="uv-radio">
+                        <% if (typeof(ticketCustomField) != 'undefined' && ticketCustomField.hasOwnProperty('valueId')) { %>
+                            <% if (_.contains(ticketCustomField.valueId, radio.id)) { %>
+                                <input name="<% print('customFields[' + customField.id + ']') %>" type="radio" value="<% print(radio.id) %>" checked />
+                            <% } else { %>
+                                <input name="<% print('customFields[' + customField.id + ']') %>" type="radio" value="<% print(radio.id) %>" />
+                            <% } %>
+                        <% } else { %>
+                            <input name="<% print('customFields[' + customField.id + ']') %>" type="radio" value="<% print(radio.id) %>" />
+                        <% } %>
+                        <span class="uv-radio-view"></span>
+                    </div>
+                    <span class="uv-radio-label"><% print(radio.name) %></span>
+                </label>
+            </div>
+        <% }); %>
+    <% } else if (customField.fieldType == 'checkbox') { %>
+        <% _.each(customField.customFieldValues, function(checkbox) { %>
+            <div class="uv-field-block">
+                <label>
+                    <div class="uv-checkbox">
+                        <% if (typeof(ticketCustomField) != 'undefined' && ticketCustomField.hasOwnProperty('valueId')) { %>
+                            <% if (_.contains(ticketCustomField.valueId, checkbox.id)) { %>
+                                <input name="<% print('customFields[' + customField.id + ']') %>" type="checkbox" value="<% print(checkbox.id) %>" checked />
+                            <% } else { %>
+                                <input name="<% print('customFields[' + customField.id + ']') %>" type="checkbox" value="<% print(checkbox.id) %>" />
+                            <% } %>
+                        <% } else { %>
+                            <input name="<% print('customFields[' + customField.id + ']') %>" type="checkbox" value="<% print(checkbox.id) %>" />
+                        <% } %>
+                        <span class="uv-checkbox-view"></span>
+                    </div>
+                    <span class="uv-checkbox-label"><% print(checkbox.name) %></span>
+                </label>
+            </div>
+        <% }); %>
+    <% } else if (customField.fieldType == 'date' || customField.fieldType == 'time' || customField.fieldType == 'datetime') { %>
+        <input class="uv-field form-control uv-date-picker <% if (customField.fieldType == 'time') {print('time');} else {print('calendar');} %> uv-header-<% print(customField.fieldType) %>" type="text" name="<% print('customFields[' + customField.id + ']') %>" id="<% print('for' + customField.name + customField.id) %>" value="<% if (typeof(ticketCustomField) != 'undefined' && ticketCustomField.hasOwnProperty('id')) print(ticketCustomField.value) %>">
+    <% } else if (customField.fieldType == 'file') { %>
+        <input type="file" name="<% print('customFields[' + customField.id + ']') %>" class="uv-field" id="<% print('for' + customField.name + customField.id) %>">
+    <% } %>
+</script>
+
+<script type="text/template" id="customfield-view-template">
+    <% if (typeof(ticketCustomField.id) != 'undefined') { %>
+        <h6><% print(customField.name) %></h6>
+        <div class="uv-field-block"></div>
+    <% } %>
+</script>
+
+<script type="text/template" id="customfield-edit-template">
+    <label class="uv-field-label">
+        <% print(customField.name) %>
+    </label>
+    <div class="uv-field-block">
+    </div>
+</script>
+
+<script type="text/javascript">
+    nl2br = function nl2br (str, breakTag = '<br>') {
+        return !str ? '' : str.replace(/\\r\\n/g, breakTag).replace(/\\/g, '');
+    };
+
+    $(function () {
+        var CustomFieldModel = Backbone.Model.extend({
+            defaults: {
+                ticketId : {{ ticket.id }},
+            },
+        });
+
+        var TicketCustomFieldModel = Backbone.Model.extend({
+            defaults: {
+                ticketId : {{ ticket.id }},
+            },
+            validation: jQuery.extend(ticketSidebarCustomFieldValidation, {}),
+        });
+
+        var CustomFieldCollection = Backbone.Collection.extend({
+            model : CustomFieldModel,
+        });
+
+        var CustomFieldRenderView = Backbone.View.extend({
+            tagName: 'div',
+            className: 'uv-aside-brick custom-field-field-display',
+            customFieldViewTemplate: _.template($('#customfield-view-template').html()),
+            customFieldViewNodeTemplate: _.template($('#customfield-view-node-template').html()),
+            events : {
+                'click .access-field': 'accessFieldData',
+            },
+            initialize: function(options) {
+                _.extend(this, { options: options });
+            },
+            render: function() {
+                this.$el.html(this.customFieldViewTemplate({
+                    customField: this.model.toJSON(),
+                    ticketCustomField: this.options.ticketCustomField
+                }));
+
+                $(this.$el).find('.uv-field-block').html(this.customFieldViewNodeTemplate({
+                    customField: this.model.toJSON(),
+                    ticketCustomField: this.options.ticketCustomField
+                }));
+
+                return this;
+            },
+            accessFieldData: function(e) {
+                self = this;
+
+                $.ajax({
+                    url: "{{ path('helpdesk_ticket_custom_fields_decrypt_xhr', {ticketId: ticket.id}) }}",
+                    data: $.extend({}, this.options.ticketCustomField, {'area': 'customer'}),
+                    method: 'POST',
+                    success: function(response) {
+                        response = $.parseJSON(response);
+                        self.options.ticketCustomField.value = response.value;
+                        self.options.ticketCustomField.encrypted = response.encrypted;
+                        self.render();
+                    },
+                    error: function(response) {
+                        console.log('error: ', response);
+                    }
+                });
+            }
+        });
+
+        var CustomFieldEditView = Backbone.View.extend({
+            tagName: 'div',
+            className: 'uv-element-block',
+            customFieldEditTemplate: _.template($('#customfield-edit-template').html()),
+            customFieldEditNodeTemplate: _.template($('#customfield-edit-node-template').html()),
+            events : {},
+            initialize: function(options) {
+                _.extend(this, { options: options });
+            },
+            render: function() {
+                this.$el.html(this.customFieldEditTemplate({
+                    customField: this.model.toJSON(),
+                    ticketCustomField: this.options.ticketCustomField
+                }));
+
+                $(this.$el).find('.uv-field-block').html(this.customFieldEditNodeTemplate({
+                    customField: this.model.toJSON(),
+                    ticketCustomField: this.options.ticketCustomField
+                }));
+
+                return this;
+            },
+        });
+
+        var CustomFieldCollectionView = Backbone.View.extend({
+            el : $("#uv-customfield-view"),
+            collectionEl: $('#customFieldCollection'),
+            ticketCustomFieldCollection: $.parseJSON("{{ ticketCustomFieldCollection|json_encode|addslashes|raw }}"),
+            customFieldCollection: new CustomFieldCollection($.parseJSON('{{ customFieldCollection|json_encode|addslashes|raw }}')),
+            events : {
+                'click .cfield-manage-pta': 'manageCustomField',
+                'submit form[name="customFieldForm"]': 'handleFormSubmission',
+                'click .cfield-pta-cancel': 'render',
+            },
+            initialize: function() {
+                this.render();
+            },
+            render: function() {
+                this.collectionEl.html('');
+                $(this.el).find('.cfield-manage-pta').fadeIn(10);
+
+                if (this.customFieldCollection.models.length != 0) {
+                    _.each(this.customFieldCollection.models, function (customField) {
+                        if (this.ticketCustomFieldCollection.hasOwnProperty(customField.attributes.id) && this.ticketCustomFieldCollection[customField.attributes.id].value != '') {
+                            var customFieldRenderView = new CustomFieldRenderView({
+                                model: customField,
+                                ticketCustomField: this.ticketCustomFieldCollection[customField.attributes.id],
+                            });
+
+                            this.collectionEl.append(customFieldRenderView.render().el);
+                        }
+                    }, this);
+                } else {
+                    this.collectionEl.html("<p>{{ 'No custom fields added to ticket.'|trans }}</p>");
+                }
+            },
+            manageCustomField: function() {
+                this.collectionEl.html('');
+
+                $(this.el).find('.cfield-manage-pta').fadeOut(10);
+                _.each(this.customFieldCollection.models, function (customField) {
+
+                    var customFieldEditView = new CustomFieldEditView({
+                        model: customField,
+                        ticketCustomField: this.ticketCustomFieldCollection.hasOwnProperty(customField.attributes.id) ? this.ticketCustomFieldCollection[customField.attributes.id] : {},
+                    });
+
+                    this.collectionEl.append(customFieldEditView.render().el);
+                }, this);
+
+                this.collectionEl.append(
+                    '<div class="uv-action-buttons">' +
+                        '<input type="submit" class="uv-btn" href="#" value="' + "{{ 'Save'|trans }}" + '">' +
+                        '<button class="uv-btn cfield-pta-cancel" href="#">' + "{{ 'Cancel'|trans }}" + '</button>' +
+                    '</div>'
+                );
+
+                $('.uv-header-date').datetimepicker({
+                    format: 'YYYY-MM-DD',
+                });
+
+                $('.uv-header-time').datetimepicker({
+                    format: 'LT',
+                });
+
+                $('.uv-header-datetime').datetimepicker({
+                    format: 'YYYY-MM-DD H:m:s'
+                });
+            },
+            handleFormSubmission: function(e) {
+                e.preventDefault();
+                self = this;
+                Backbone.Validation.bind(this);
+
+                var formData = $(e.currentTarget).serializeObject();
+                this.model.set(formData);
+
+                if (this.model.isValid(true)) {
+                    var submissionData = new FormData();
+
+                    submissionData.set('area', 'customer');
+                    _.each(this.model.toJSON(), function (fieldValue, fieldName) {
+                        if (fieldValue != '') {
+                            submissionData.set(fieldName, fieldValue);
+                        }
+                    });
+
+                    var fileList = $('#customFieldCollection').find('input[type="file"]');
+                    if (fileList.length > 0) {
+                        _.each(fileList, function (field) {
+                            if ($(field)[0].files.length != 0) {
+                                submissionData.set($(field)[0].name, $(field)[0].files[0] );
+                            }
+                        });
+                    }
+
+                    $.ajax({
+                        url: "{{ path('helpdesk_ticket_custom_fields_xhr') }}",
+                        data: submissionData,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        type: 'POST',
+                        success: function(response) {
+                            response = $.parseJSON(response);
+                            if (response.hasOwnProperty('ticketCustomFieldsValuesCollection')) {
+                                self.ticketCustomFieldCollection = response.ticketCustomFieldsValuesCollection;
+                                self.render();
+                            } else {
+                                console.log('collection not received');
+                            }
+                        },
+                        error: function(response) {
+                            console.log('error: ', response);
+                        }
+                    });
+                }
+            },
+        });
+
+        var customFieldCollectionView = new CustomFieldCollectionView({
+            model: new TicketCustomFieldModel()
+        });
+    });
+</script>

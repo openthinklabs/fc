@@ -1,0 +1,5 @@
+
+formbuilder_preview_form:
+    path: /formbuilder/preview/{id}
+    controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\FormBuilderController::previewForm
+    defaults: {id: ''}

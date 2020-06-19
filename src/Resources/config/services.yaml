@@ -1,0 +1,20 @@
+parameters:
+    max_upload_size: 20
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+    UVDesk\CommunityPackages\UVDesk\FormComponent\:
+        resource: '../../*'
+        exclude: '../../Entity'
+
+    uvdesk_form_component_customfields_service:
+        class: UVDesk\CommunityPackages\UVDesk\FormComponent\Services\CustomFieldsService
+        public: true
+        arguments:
+            $entityManager: '@Doctrine\ORM\EntityManagerInterface' 
+            $container: '@Symfony\Component\DependencyInjection\ContainerInterface' 
+            $validationService: '@UVDesk\CommunityPackages\UVDesk\FormComponent\Services\ValidationService'
+            $translatorService: '@Symfony\Component\Translation\TranslatorInterface'

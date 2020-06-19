@@ -1,0 +1,75 @@
+# uvdesk_form_component_form_builder:
+#     path: /apps/uvdesk/form-component/form-builder
+#     controller: Webkul\UVDesk\ExtensionFrameworkBundle\Controller\Application::dashboard
+#     defaults:
+#         vendor: uvdesk
+#         package: form-component
+#         qualifiedName: form-builder
+
+#Form Builder Routers
+uvdesk_form_component_form_builder:
+    path: /form-builder
+    controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\FormBuilderController::loadFormBuilders
+
+formbuilder_create_configuration:
+    path:     /settings/formbuilder/create
+    controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\FormBuilderController::createFormBuilderConfiguration
+
+
+formbuilder_update_configuration:
+    path: /settings/formbuilder/update/{id}
+    controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\FormBuilderController::updateFormConfigurations
+    defaults: { id: ''}
+
+formbuilder_remove_configuration_xhr:
+    path: /settings/formbuilder/remove/{id}
+    controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\FormBuilderController::removeFormConfiguration
+    defaults: {id: ''}
+
+formbuilder_load_configurations_xhr:
+    path:   /settings/formbuilder/xhr
+    controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\FormBuilderController::loadFormsXHR
+
+
+formbuilder_settings:
+    path:     /settings/formbuilder
+    controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\FormBuilderController::loadFormBuilders
+
+
+
+# Custom Fields Routers
+uvdesk_form_component_custom_fields:
+    path: /custom-fields
+    controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\CustomFieldsController::loadCustomFields
+
+uvdesk_form_component_custom_fields_log:
+    path: /custom-field/log
+    controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\CustomFieldsController::viewCustomFieldLog
+
+uvdesk_form_component_custom_fields_log_xhr:
+    path: /custom-field/log-xhr
+    controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\CustomFieldsController::viewCustomFieldLogXhr
+
+uvdesk_form_component_custom_fields_xhraction:
+    path: /custom-field-xhr/{field}
+    controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\CustomFieldsController::customFieldsxhr
+    defaults:
+        field: 0
+
+uvdesk_form_component_custom_fields_reorder_action:
+    path: /custom-field/reorder
+    controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\CustomFieldsController::customFieldsReorder
+
+uvdesk_form_component_ticket_custom_fields_xhr:
+    path:     /ticket/custom-field/update
+    controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\CustomFieldsController::ticketCustomFieldXHR
+
+uvdesk_form_component_download_ticket_attachment:
+    path:     /ticket/download/{attachmentId}
+    controller: Webkul\UVDesk\CoreFrameworkBundle\Controller\Ticket::downloadAttachment
+    defaults:
+        attachmentId: 0
+        
+uvdesk_form_component_ticket_custom_fields_decrypt_xhr:
+    path:     /ticket/custom-field/view/{ticketId}
+    controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller::decryptCustomFieldXHR
