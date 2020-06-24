@@ -84,6 +84,25 @@
             list-style-type: none; 
             margin-left: 40px; 
         }
+        #ticket-form {
+            margin-left: 60px; 
+            margin-top: 30px; 
+        }
+        .validation-message {
+            color: red;
+        }
+        .textarea {
+            margin-top: 30px;
+        }
+
+        #create-ticket-btn {
+            margin-top: 150px; 
+            display: inline-block;
+            z-index: 999; 
+        }
+        .form-builder-checkbox {
+            padding: 20px; 
+        }
 	</style>
 
 	<div class="uv-inner-section">
@@ -93,6 +112,7 @@
 		{{ uvdesk_extensibles.getRegisteredComponent(asideTemplate).renderSidebar(asideSidebarReference) | raw }}
 
 		<div class="uv-view {% if app.request.cookies and app.request.cookies.get('uv-asideView') %}uv-aside-view{% endif %}">
+            
             {% if formbuilder is not empty and formbuilder.id is defined %}
 				<h1>Update FormBuilder</h1>
 			{% else %}
@@ -277,8 +297,6 @@
                                 
                                 {% endif %}
                          
-
-
                                 {% if customfield.fieldType is defined and customfield.fieldType == 'textarea' %}
                                 	
                                 <li class="cf-item">
@@ -293,9 +311,6 @@
                                 </li>
                                 
                                 {% endif %}
-
-
-
 
 
                                 {% if customfield.fieldType is defined and customfield.fieldType == 'radio' %}
@@ -313,11 +328,6 @@
 
                                 {% endif %}
 
-
-
-
-
-
                                 {% if customfield.fieldType is defined and customfield.fieldType == 'select' %}
 
                                 <li class="cf-item">
@@ -332,9 +342,6 @@
                                 </li>
                                 	
                                 {% endif %}
-
-
-
 
 
 
@@ -354,10 +361,6 @@
                                 {% endif %}
 
 
-
-
-
-
                                 {% if customfield.fieldType is defined and customfield.fieldType == 'date' %}
 
                                 <li class="cf-item">
@@ -372,11 +375,6 @@
                                 </li>
                                 	
                                 {% endif %}
-
-
-
-
-
 
 
                                 {% if customfield.fieldType is defined and customfield.fieldType == 'time' %}
@@ -466,8 +464,6 @@
                                 {% endif %}
 
 
-
-
                                 {% if cf.fieldType is defined and cf.fieldType == 'textarea' %}
                                 	
                                 <li class="cf-item">
@@ -487,10 +483,6 @@
                                 
                                 {% endif %}
 
-
-
-
-
                                 {% if cf.fieldType is defined and cf.fieldType == 'radio' %}
                                 	
                                 <li class="cf-item">
@@ -509,10 +501,6 @@
                                 </li>
 
                                 {% endif %}
-
-
-
-
 
 
                                 {% if cf.fieldType is defined and cf.fieldType == 'select' %}
@@ -560,10 +548,6 @@
                                 {% endif %}
 
 
-
-
-
-
                                 {% if cf.fieldType is defined and cf.fieldType == 'date' %}
 
                                 <li class="cf-item">
@@ -607,10 +591,6 @@
                                 </li>
                                 {% endif %}
 
-
-
-
-
                                 {% if cf.fieldType is defined and cf.fieldType == 'datetime' %}
 
                                 <li class="cf-item">
@@ -629,10 +609,6 @@
                                 </li>
                                 	
                                 {% endif %}
-
-
-
-
 
                                 {% if cf.fieldType is defined and cf.fieldType == 'file' %}
 
@@ -661,12 +637,248 @@
 
 				{% if formbuilder is not empty and formbuilder.id is defined  %}
 					<input class="uv-btn btn-submission"  href="#" value="{{ 'Update'|trans }}" type="submit">
-                    <a href="{{path('formbuilder_preview_form', {'id': formbuilder.id}) }}"  ><input class="uv-btn" href="#" value="{{ 'Preview'|trans }}" ></a>
-                    <input class="uv-btn" value="{{'Embed'|trans}}" >
+                    <input class="uv-btn" id="preview-modal-btn"  value="{{ 'Preview'|trans }}" type="button">
+                    <input class="uv-btn" id="embed-modal-btn" value="{{'Embed'|trans}}" type="button">
 				{% else %}
 					<input class="uv-btn btn-submission" href="#" value="{{ 'Create FormBuilder'|trans }}" type="submit">
 				{% endif %}
 			</form>
+
+   
+            {# START MODAL #}
+            <div class="uv-pop-up-overlay uv-no-error-success-icon" id="hints">
+                <div class="uv-pop-up-box uv-pop-up-wide">
+                    <span class="uv-pop-up-close"></span>
+                    <h2>{% trans %}Generate a Ticket{% endtrans %}</h2>
+                    <div class="modal-body">
+                    {% if formbuilder is not empty and formbuilder.id is defined %}
+
+                        <form method="POST" action="{{ path('formbuilder_preview_create_ticket', {'id': formbuilder.id}) }}" enctype="multipart/form-data" id="ticket-form">
+
+                            <h2><b>{{ formbuilder.form_name }}</b></h2>
+
+                                <div class="uv-element-block">
+                                    <label class="uv-field-label">Name</label>
+                                        <div class="uv-field-block">
+                                            <input name="name" class="uv-field create-ticket" type="text" value="" required>
+                                            <span class="validation-message"></span>
+                                        </div>
+                                    <span class="uv-field-info">Customer Full Name</span>
+                                </div>
+
+                            {# Email is a mandatory field. #}
+                            <div class="uv-element-block">
+                                <label class="uv-field-label">Email</label>
+                                    <div class="uv-field-block">
+                                        <input name="email" class="uv-field create-ticket" type="text" value="" required> 
+                                        <span class="validation-message"></span>
+                                    </div>
+                                <span class="uv-field-info">Customer Email Address</span>
+                            </div>
+
+                            <div class="uv-element-block">
+                                <label class="uv-field-label">Message</label>
+                                    <div class="uv-field-block">
+                                        <textarea name="reply" class="uv-field create-ticket" type="text" id='ticket-message'></textarea required>
+                                        <span class="validation-message"></span>
+                                    </div>
+                                <span class="uv-field-info">Ticket query message</span>
+                            </div>
+                            {% if formbuilder.type == '1'%}
+                            {% endif %}
+                            {% if formbuilder.subject == '1'%}
+                                <div class="uv-element-block">
+                                    <label class="uv-field-label">Subject</label>
+                                        <div class="uv-field-block">
+                                            <input name="subject" class="uv-field create-ticket" type="text" value="" required>
+                                            <span class="validation-message"></span>
+                                        </div>
+                                    <span class="uv-field-info">Ticket Subject</span>
+                                </div>
+                            {% endif %}
+                            {% if formbuilder.order_no == '1'%}
+                                <div class="uv-element-block">
+                                    <label class="uv-field-label">Order #</label>
+                                        <div class="uv-field-block">
+                                            <input name="order_no" class="uv-field create-ticket" type="text" value="" required>
+                                            <span class="validation-message"></span>
+                                        </div>
+                                    <span class="uv-field-info">Order Number</span>
+                                </div>
+                            {% endif %}
+
+                            {% if formbuilder.file == '1'%}
+                                <div class="uv-element-block attachment-block uv-no-error-success-icon">
+                                    <label>
+                                        <input type="file" name="file">
+                                    </label>
+                                </div>
+                            {% endif %}
+
+                            {% if formbuilder.gdpr == '1'%}
+                                <div class="uv-element-block form-builder-checkbox">
+                                    <div class="uv-field-block uv-vertical-align" name="gdpr_compliance">
+                                        <input type="checkbox" id="gdpr" style="margin-left: unset;width: 20px;height: 25px;">
+                                        <span style="position: relative;top: -8px">I agree to the <a href="https://www.uvdesk.com/en/gdpr" target="_blank">  Terms &amp; Conditions</a></span>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if customFields is not empty and customFields is defined %}
+                                {% for cf in customFields %}
+
+                                    {% if cf.fieldType is defined and cf.fieldType == 'text' %}
+                                        <div class="uv-element-block custom-fields">
+                                        <label class="uv-field-label">{{ cf.name }}</label>
+                                        <div class="uv-field-block">
+                                                <input name="customFields[{{  cf.id }}]" class="uv-field create-ticket" type="text" value="" id="{{ cf.id }}" required>
+                                                <span class="validation-message"></span>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    {%  if cf.fieldType is defined and cf.fieldType == 'textarea' %}
+                                        <div class="uv-element-block custom-fields textarea">
+                                            <label class="uv-field-label">{{ cf.name }}</label>
+                                            <div class="uv-field-block">
+                                                <input name="customFields[{{  cf.id }}]" class="uv-field create-ticket" type="textarea" value="" id="{{ cf.id }}" required>
+                                                <span class="validation-message"></span>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    {%  if cf.fieldType is defined and cf.fieldType == 'radio' %}
+                                        <div class="uv-element-block custom-fields">
+                                            <label class="uv-field-label">{{ cf.name }}</label>
+                                            <div class="uv-field-block">
+                            
+                                                {% for options in cf.options %}
+                                                    <input type="radio"  name="customFields[{{  cf.id }}]" value="{{ options }}" >
+                                                    <label for="{{ options }}">{{ options }}</label><br>
+                                                {% endfor %}
+                                                <span class="validation-message"></span>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    {%  if cf.fieldType is defined and cf.fieldType == 'select' %}
+                                        <div class="uv-element-block custom-fields">
+                                            <label class="uv-field-label">{{ cf.name }}</label>
+                                            <div class="uv-field-block">
+                                                <select name="customFields[{{  cf.id }}]" class="uv-field create-ticket" value="{{ cf.id }}" id="{{ cf.id }}" required>
+                                                    {% for options in cf.options %}
+                                                        <option value="{{ options }}">{{ options }}</option>
+                                                    {% endfor %}
+                                                <span class="validation-message"></span>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    {%  if cf.fieldType is defined and cf.fieldType == 'checkbox' %}
+                                        <div class="uv-element-block custom-fields form-builder-checkbox">
+                                            <label class="uv-field-label">{{ cf.name }}</label>
+                                            <div class="uv-field-block">
+                                                {% for options in cf.options %}
+                                                    <input type="checkbox"  name="customFields[{{  cf.id }}]" value="{{ options }}" id="{{ cf.id }}"/>
+                                                    <label for="{{ options }}"> {{ options }} </label><br>
+                                                {% endfor %}
+                                                <span class="validation-message"></span>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    {%  if cf.fieldType is defined and cf.fieldType == 'date' %}
+                                        <div class="uv-element-block custom-fields">
+                                            <label class="uv-field-label">{{ cf.name }}</label>
+                                            <div class="uv-field-block">
+                                                <input name="customFields[{{  cf.id }}]" class="uv-field create-ticket" type="date" value="" id="{{ cf.id }}" required>
+                                                <span class="validation-message"></span>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    {%  if cf.fieldType is defined and cf.fieldType == 'time' %}
+                                        <div class="uv-element-block custom-fields">
+                                            <label class="uv-field-label">{{ cf.name }}</label>
+                                            <div class="uv-field-block">
+                                                <input name="customFields[{{  cf.id }}]" class="uv-field create-ticket" type="time" value="" id="{{ cf.id }}" required>
+                                                <span class="validation-message"></span>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    {%  if cf.fieldType is defined and cf.fieldType == 'datetime' %}
+                                        <div class="uv-element-block custom-fields">
+                                            <label class="uv-field-label">{{ cf.name }}</label>
+                                            <div class="uv-field-block">
+                                                <input name="customFields[{{  cf.id }}]" class="uv-field create-ticket" type="datetime-local" value="" id="{{ cf.id }}" required>
+                                                <span class="validation-message"></span>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    {%  if cf.fieldType is defined and cf.fieldType == 'file' %}
+                                        <div class="uv-element-block custom-fields">
+                                            <label class="uv-field-label">{{ cf.name }}</label>
+                                            <div class="uv-field-block">
+                                                <input name="customFields[{{  cf.id }}]" class="uv-field create-ticket" type="file" value="" id="{{ cf.id }}" required>
+                                                <span class="validation-message"></span>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+
+                            {% endif %}
+
+                            <div>
+                                <input type="submit"  id="create-ticket-btn" class="uv-btn" value="Create Ticket" />
+                            </div> 
+                        </form>
+
+                    {% else %}
+                        <h2> Unable to render FormBuilder Preview. </h2>
+                    {% endif %}
+                </div>
+            </div>
+            </div>
+
+            {# END MODAL #}
+
+            {# EMBED MODAL START #}
+
+            
+            <div class="uv-pop-up-overlay uv-no-error-success-icon" id="embed-modal" >
+                <div class="uv-pop-up-box uv-pop-up-wide">
+                    <span class="uv-pop-up-close"></span>
+                    <h2 class="modal-title">Embed Code</h2>
+                    {% set domainInfo = app.request.uri|split('/') %}
+                    <div class="uv-tabs">
+                        <ul>
+                            {# <li for="js-tab" class="uv-tab-active">JS Version</li> #}
+                            <li for="iframe-tab">Iframe version</li>
+                            <li for="puburl-tab">Public Url</li>
+                        </ul>
+                    </div>
+                    {# <div id="js-tab" class="uv-tab-view uv-tab-view-active active_tab">
+                        <textarea class="uv-field" readonly="" id="clipboard-value-js" style="resize:none;">&lt;div id="uv_top_message" class="uv_load"&gt;&lt;img src="https://cdn.uvdesk.com/bundles/webkuldefault/images/cssImages/loader.gif"&gt;&lt;/div&gt;&lt;script id="22545b3b24775bfa85b3b24775c055" src="{{ domainInfo[2] ~ path('formbuilder_create_ticket', {'id': formbuilder.id}) }}" async="async" &gt; &lt;/script&gt; &lt;style&gt;.uv_load{min-height:400px;margin:0 auto}.uv_load img{position:relative;margin-top:25%;margin-left:-25%;}.uv_form .optionwrapper span,.uv_form label{margin-right:10px}.uv_form .optionwrapper label{display:inline-block;}.uv_form select{display:inline-block;background-color:#fff}#uv_top_message,.uv_form{width:600px;background-color:#fff;padding:10px;border-radius:4px;overflow-wrap:break-word}.uv_form input[type=checkbox]:hover,.uv_form input[type=radio]:hover{cursor:pointer}.uv_form label{display:block;text-transform:capitalize;color:#333;font-size:16px;margin-bottom:4px}.uv_form textarea{resize:vertical;min-height:60px}div.uv_show-error{color:#FF5656;font-size:15px;margin-top:5px;font-style:italic}.uv_form-control,.uv_selectpicker{width:70%;height:36px;border:1px solid #B1B1AE;border-radius:3px;display:inline-block;vertical-align:middle;transition:.2s cubic-bezier(.4,0,.2,1);padding:0 10px;font-size:15px;color:#333;margin:10px 0}.uv_form-control:focus,.uv_selectpicker:focus{outline:0;border-color:#66afe9;box-shadow:inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6)}.uv_form .optionwrapper *{vertical-align:top;color:#777}.uv_form .optionwrapper input{width:18px;height:18px}.uv_selectpicker{display:block}.uv_form-group{margin-bottom:10px;position:relative}.uv_form button[type=reset],.uv_form button[type=submit]{font-size:15px;padding:10px;color:#FFF;background-color:#7C70F4;display:inline-block;text-transform:uppercase;border-radius:3px;font-weight:700;border:none;font-family:inherit;cursor:pointer;vertical-align:middle;margin:5px 10px 5px 0;transition:.2s cubic-bezier(.4,0,.2,1)}.uv_form button:focus{outline:0}.uv_has_error checkbox,.uv_has_error input,.uv_has_error select,.uv_has_error textarea{border-color:#FF5656}@media only screen and (max-width:768px){.uv_form{width:90%}}.uv_flash{position:fixed;right:10px;top:10px;padding:10px 35px 10px 40px;color:#fff;background-color:#37bc9b;font-weight:700;width:320px;border-radius:5px}.uv_flash.success{background-color: #37bc9b}.uv_flash.danger{background-color: #da4453}.uv_form-group.uv_has_error:after{content:'';width:21px;height:21px;position:absolute}.uv_flash .close{position:absolute;top:10px;right:20px;cursor:pointer;font-size:21px;text-shadow:0 1px 0 #fff}.uv_has_error .uv_form-control:after{left:10px;display:inline-block;background-image:url(https://cdn.uvdesk.com/bundles/webkuldefault/images/uvdesk-sprite.svg);vertical-align:middle;margin-left:10px;background-position:0 -46px}.uv_form-group.uv_has_error:after{color:#a94442;background:url(https://cdn.uvdesk.com/bundles/webkuldefault/images/uvdesk-sprite.svg) 0 -46px;left:71%;top:40px}.uv-field-info{display: block;color: #6F6F6F;font-size: 15px;font-style: italic;}.uv_checkbox-control{height: 20px;width:20px;margin-right: 10px;}.display-ib{display:inline-block;}.uv_checkbox-control:focus{box-shadow: none}a{text-decoration: unset;}&lt;/style&gt;</textarea>
+                        <button class="uv-btn uv-copy-button" data-copy-target="clipboard-value-js" type="button">Copy</button>
+                    </div> #}
+                    <div id="iframe-tab" class="uv-tab-view">
+                        <textarea class="uv-field" readonly="" id="clipboard-value-iframe" style="resize:none;">&lt;iframe width="600px" height="780px" style="border:none;" src="{{ domainInfo[2] ~ path('formbuilder_create_ticket', {'id': formbuilder.id}) }}" &gt;&lt;/iframe&gt;</textarea>
+                        <button class="uv-btn uv-copy-button" data-copy-target="clipboard-value-iframe" type="button">Copy</button>
+                    </div>
+                    <div id="puburl-tab" class="uv-tab-view">
+                        <div class="uv-element-block">
+                            
+                            <a href="{{ path('formbuilder_create_ticket', {'id': formbuilder.id}) }}" target="_blank" id="clipboard-value-link">{{ domainInfo[2] ~ path('formbuilder_create_ticket', {'id': formbuilder.id}) }}</a>
+                        </div>
+                            <a href="{{ path('formbuilder_create_ticket', {'id': formbuilder.id} ) }}" target="_blank">
+                            <button class="uv-btn" type="button">Visit</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {# EMBED MODAL END #}
 
 		</div>
 	</div>
@@ -677,6 +889,16 @@
 
 	<script type="text/javascript">
 		$(function () {
+            
+          $('#preview-modal-btn').click(function() {
+              $('#hints').show();
+          });
+
+          $('#embed-modal-btn').click(function() {
+              $('#embed-modal').show();
+          });
+            
+
 			var FormBuilderConfigurationModel = Backbone.Model.extend({
                 idAttribute: "id",
                 validation: {
@@ -688,13 +910,19 @@
 				}
 			});
             var FormBuilderConfigurationView = Backbone.View.extend({
+
                 events: {
                     'click #embed-btn': 'embedModal',
                     'click .btn-submission' : "validateSubmission",
+
                 },
                 initialize: function() {
                     Backbone.Validation.bind(this);
+                }
+                embedModal: function(e) {
+                  
                 },
+
                 validateSubmission: function(e) {
                     e.preventDefault();
                     this.model.set(this.$el.serializeObject());

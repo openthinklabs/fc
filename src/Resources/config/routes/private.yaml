@@ -21,6 +21,7 @@ formbuilder_update_configuration:
     controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\FormBuilderController::updateFormConfigurations
     defaults: { id: ''}
 
+
 formbuilder_remove_configuration_xhr:
     path: /settings/formbuilder/remove/{id}
     controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\FormBuilderController::removeFormConfiguration

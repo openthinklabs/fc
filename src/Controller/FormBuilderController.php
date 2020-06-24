@@ -123,6 +123,7 @@ class FormBuilderController extends BaseController
 
         $customFields =  $em->getRepository('UVDeskFormComponentPackage:CustomFields')->findAll();
         $customFieldsArray = [];
+        $multiOptions = ['select', 'radio', 'checkbox']; 
 
         foreach($customFields as $k => $v)
         {
@@ -132,35 +133,52 @@ class FormBuilderController extends BaseController
                 'customFields' => $v->getId(),
             ]);
             $temp = [];
+
             if($v->getStatus() == true)
             {
+              
                 if(in_array($v->getId() ,$arrayOfIds))
                 {
-                    $temp = [
-                        'id'        => $v->getId(),
-                        'name'      => $v->getName(),
-                        'fieldType' => $v->getFieldType(),
-                        'value'     => $v->getValue(),
-                        'required'  => $v->getRequired(),
-                        'validation'=> json_decode($v->getValidation(), true),
-                        'checked'   => true,
-                    ]; 
-                } else {
-                    $temp = [
-                        'id'        => $v->getId(),
-                        'name'      => $v->getName(),
-                        'fieldType' => $v->getFieldType(),
-                        'value'     => $v->getValue(),
-                        'required'  => $v->getRequired(),
-                        'validation'=> json_decode($v->getValidation(), true),
-                        'checked'   => false,
-                    ]; 
+                    $options = [];
+                    if(in_array($v->getFieldType(), $multiOptions))
+                    {
+                       
+                        foreach($v->getCustomFieldValues() as $cfv)
+                        {
+                            $options[] = $cfv->getName();
+                        }
+                      
+                        $temp = [
+                            'id'        => $v->getId(),
+                            'name'      => $v->getName(),
+                            'fieldType' => $v->getFieldType(),
+                            'value'     => $v->getValue(),
+                            'required'  => $v->getRequired(),
+                            'validation'=> json_decode($v->getValidation(), true),
+                            'checked'   => true,
+                            'options'   => $options,
+                        ]; 
+                
+                    } else {
+
+                        $temp = [
+                            'id'        => $v->getId(),
+                            'name'      => $v->getName(),
+                            'fieldType' => $v->getFieldType(),
+                            'value'     => $v->getValue(),
+                            'required'  => $v->getRequired(),
+                            'validation'=> json_decode($v->getValidation(), true),
+                            'checked'   => true,
+                            'options'   =>  $options,
+                        ]; 
+
+                    }
                 }
              
                 $customFieldsArray[$k] = $temp; 
             } 
-
-        }
+            
+        } 
 
     
         if($request->getMethod() == 'POST')
@@ -168,7 +186,10 @@ class FormBuilderController extends BaseController
             $em = $this->getDoctrine()->getEntityManager();
             $form = $em->getRepository('UVDeskFormComponentPackage:Form')->find($id);
 
-            $form->setFormName($request->request->get('form_name'));
+            $formName = (empty($request->request->get('form_name')) == true ? "No Form Name Given" : $request->request->get('form_name'));
+
+            // $form->setFormName($request->request->get('form_name'));
+            $form->setFormName($formName);
             $form->setName($request->request->get('name') == '1' ? '1' : '0');
             $form->setType($request->request->get('type') == '1' ? '1' : '0');
             $form->setSubject($request->request->get('subject') == '1' ? '1' : '0');
@@ -202,10 +223,12 @@ class FormBuilderController extends BaseController
             return new RedirectResponse($this->generateUrl('formbuilder_settings'));
         }
 
+
         return $this->render('@_uvdesk_extension_uvdesk_form_component\FormBuilders\manageConfigurations.html.twig',[
             'formbuilder' => $data ?? null,
             'arrayOfIds' => $arrayOfIds,
             'selectedCustomFields' => $customFieldsArray,
+            'customFields' => $customFieldsArray,
         ]);
     }
 
@@ -241,8 +264,8 @@ class FormBuilderController extends BaseController
             'alertMessage' => 'Form configuration removed successfully.',
         ]);
     }
-
-    public function previewForm($id, Request $request, FileUploadService $fileUploadService = null, CustomFieldsService $customFieldsService = null)
+ 
+    public function previewForm($id, Request $request, FileUploadService $fileUploadService , CustomFieldsService $customFieldsService )
     {
         $em = $this->getDoctrine()->getEntityManager();
         $form = $em->getRepository('UVDeskFormComponentPackage:Form')->find($id);
@@ -267,7 +290,7 @@ class FormBuilderController extends BaseController
         $arrayOfIds = unserialize($savedCF->getArrayOfIds()); 
         $customFields =  $em->getRepository('UVDeskFormComponentPackage:CustomFields')->findAll();
         $multiOptions = ['select', 'radio', 'checkbox']; 
-
+        //preview-original cf array
         foreach($customFields as $k => $v)
         {
             $cfRepo = $this->getDoctrine()->getRepository(CustomFieldsValues::class); 
@@ -376,13 +399,12 @@ class FormBuilderController extends BaseController
                     } 
                 }
 
-                $submittedCustomlFieldFiles = $request->files->get('customFields'); 
+                $submittedCustomFieldFiles = $request->files->get('customFields'); 
+          
     
                 if( !empty($submittedCustomFieldFiles) )
                 {
 
-                    $fileUploadService = new FileUploadService(); 
-                    $customFieldsService = new CustomFieldsService(); 
     
                     $baseUploadPath = '/custom-fields/ticket/' . $ticket->getId() . '/';
                     $temporaryFiles = $request->files->get('customFields');
@@ -395,28 +417,43 @@ class FormBuilderController extends BaseController
                         $fileName['key'] = $key;
                         $uploadedFileCollection[] = $fileName;
                     }
-    
+
                     $cfRepo = $this->getDoctrine()->getRepository(CustomFields::class); 
+
                     if (!empty($uploadedFileCollection)) {
+
                         foreach ($uploadedFileCollection as $uploadedFile) {
-    
+                            $existingCustomFieldValue = null;
+                            if (!empty($ticketCustomFieldsValuesCollection)) {
+
+
+                                foreach ($ticketCustomFieldsValuesCollection as $ticketCustomField) {
+                                    if ($ticketCustomField->getTicketCustomFieldsValues()->getId() == $uploadedFile['key']) {
+                                        $existingCustomFieldValue = $ticketCustomField;
+                                        break;
+                                    }
+                                }
+                            }
+
                             $uploadedAttachment = $customFieldsService->addFilesEntryToAttachmentTable([$uploadedFile]);
                             if (!empty($uploadedAttachment[0])) {
-    
+
+                                // $customField = $customFieldRepository->findOneById($uploadedFile['key']);
                                 $customField = $cfRepo->findOneById($uploadedFile['key']);
-                            
+                                $ticketCustomFieldValue = !empty($existingCustomFieldValue) ? $existingCustomFieldValue : new TicketCustomFieldsValues();
+                                // $ticketCustomFieldValue->setValue($resourceURL);
                                 $ticketCustomFieldValue->setValue(json_encode(['name' => $uploadedAttachment[0]['name'], 'path' => $uploadedAttachment[0]['path'], 'id' => $uploadedAttachment[0]['id']]));
                                 $ticketCustomFieldValue->setTicketCustomFieldsValues($customField);
                                 $ticketCustomFieldValue->setTicket($ticket);
-    
+
                                 $em->persist($ticketCustomFieldValue);
-                                $em->persist($ticket); 
+                                $em->persist($ticket);
+                                $em->flush();
                             }
                         }
-                        $em->flush(); 
                     }
                 } //end of file processing
-
+        
 
             } // end of !empty ticket
 

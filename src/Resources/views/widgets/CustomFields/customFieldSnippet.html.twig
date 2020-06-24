@@ -55,6 +55,8 @@
     </div>
 
     <div class="uv-filter-paper" style="top: 120px; padding-top: 20px;">
+    {# Bottom dump displays the saved custom field, not the cf of the created ticket #}
+    {# {{ dump(customFieldCollection) }} #}
         {% if customFieldCollection is not empty %} {# and user_service.checkPermission('ROLE_AGENT_EDIT_TICKET') %} #}
             <div class="uv-element-block" style="margin: 0px; padding-bottom: 15px; border-bottom: solid 1px #D3D3D3;">
                 <h6 class="uv-field-label">{{ 'Manage Custom Fields'|trans }}</h6>
@@ -72,6 +74,7 @@
 
     <% if (ticketCustomField.encrypted == false) { %>
         <% if (_.contains(['text', 'textarea', 'date', 'datetime', 'time'], customField.fieldType)) { %>
+       
             <% print('<span class="uv-pre-line">' + nl2br(ticketCustomField.value) + '</span>') %>
         <% } else if (_.contains(['select', 'radio'], customField.fieldType)) { %>
             <% print('<span>' + ticketCustomField.value + '</span>') %>
@@ -300,21 +303,42 @@
             },
             render: function() {
                 this.collectionEl.html('');
+                console.log("testing 123");
+                console.log(this.ticketCustomFieldCollection); 
+                console.log("testing 123");
 
                 $(this.el).find('.cfield-manage-pta').prev('.uv-field-label').html("{{ 'Manage Custom Fields'|trans }}");
                 $(this.el).find('.cfield-manage-pta').fadeIn(10);
                 if (this.customFieldCollection.length != 0) {
+  
                     if (this.ticketCustomFieldCollection.length != 0) {
                         _.each(this.customFieldCollection.models, function (customField) {
 
-                           if( customField.attributes.fieldType != 'file')
-                           {
-                                if(this.ticketCustomFieldCollection[customField.attributes.id].value.length == 0 )
-                                {
-                                    this.ticketCustomFieldCollection[customField.attributes.id].value = customField.attributes.value;                      
-                                }
-                           }
-                           
+                            //console.log("Ticket Custom field");
+                            //console.log(this.ticketCustomFieldCollection); 
+
+                          if( customField.attributes.fieldType == 'file')
+                          {
+                              console.log('is a file');
+                              console.log(customField);
+                              this.ticketCustomFieldCollection[customField.attributes.id] = customField; 
+
+                          } else {
+
+                              console.log('not a file');
+                              console.log(this.ticketCustomFieldCollection);
+                          }
+
+                           //if( customField.attributes.fieldType != 'file')
+                           //{
+                           //    
+                               //error 
+                           //     if(this.ticketCustomFieldCollection[customField.attributes.id].value.length == 0 )
+                           //     {
+                           //         this.ticketCustomFieldCollection[customField.attributes.id].value = customField.attributes.value;                      
+                           //     }
+                           //}
+
                             //if (this.ticketCustomFieldCollection.hasOwnProperty(customField.attributes.id)) { //&& this.ticketCustomFieldCollection[customField.attributes.id].value != '') {
                             if (this.ticketCustomFieldCollection.hasOwnProperty(customField.attributes.id) && this.ticketCustomFieldCollection[customField.attributes.id].value != '') { //&& this.ticketCustomFieldCollection[customField.attributes.id].value != '') {
 

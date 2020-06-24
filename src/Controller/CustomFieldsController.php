@@ -394,16 +394,22 @@ class CustomFieldsController extends BaseController
                 }
                 
                 if (!empty($submittedCustomFileFields)) {
+
+                    // dump("inside 'if not empty submittedcustomfilefields'."); die; 
                     
                     $baseUploadPath = '/custom-fields/ticket/' . $ticket->getId() . '/';
                     $temporaryFiles = $request->files->get('customFields');
-                    
+                    dump("dumping tempFIles");
+                    dump($temporaryFiles); 
                     $uploadedFileCollection = [];
                     foreach($temporaryFiles as $key => $temporaryFile) {
                         $fileName = $fileUploadService->uploadFile($temporaryFile, $baseUploadPath, true);
                         $fileName['key'] = $key;
                         $uploadedFileCollection[] = $fileName;
                     }
+
+                    dump("dumping ticketCFsValuesCollection");
+                    dump($ticketCustomFieldsValuesCollection); 
                     
                     if (!empty($uploadedFileCollection)) {
                         foreach ($uploadedFileCollection as $uploadedFile) {
@@ -418,6 +424,8 @@ class CustomFieldsController extends BaseController
                             }
 
                             $uploadedAttachment = $customFieldsService->addFilesEntryToAttachmentTable([$uploadedFile]);
+                            dump("dumping uploadedAttachment");
+                            dump($uploadedAttachment);
                             if (!empty($uploadedAttachment[0])) {
                                 $customField = $customFieldRepository->findOneById($uploadedFile['key']);
                                 $ticketCustomFieldValue = !empty($existingCustomFieldValue) ? $existingCustomFieldValue : new TicketCustomFieldsValues();
@@ -425,6 +433,9 @@ class CustomFieldsController extends BaseController
                                 $ticketCustomFieldValue->setValue(json_encode(['name' => $uploadedAttachment[0]['name'], 'path' => $uploadedAttachment[0]['path'], 'id' => $uploadedAttachment[0]['id']]));
                                 $ticketCustomFieldValue->setTicketCustomFieldsValues($customField);
                                 $ticketCustomFieldValue->setTicket($ticket);
+
+                                dump("dumping ticket custom field value");
+                                // dump($ticketCustomFieldValue); die;
 
                                 $entityManager->persist($ticketCustomFieldValue);
                                 $entityManager->persist($ticket);

@@ -1,5 +1,11 @@
 
-formbuilder_preview_form:
+# formbuilder_preview_form:
+formbuilder_create_ticket:
     path: /formbuilder/preview/{id}
+    controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\FormBuilderController::previewForm
+    defaults: {id: ''}
+
+formbuilder_preview_create_ticket:
+    path: /settings/formbuilder/update/{id}
     controller: UVDesk\CommunityPackages\UVDesk\FormComponent\Controller\FormBuilderController::previewForm
     defaults: {id: ''}
