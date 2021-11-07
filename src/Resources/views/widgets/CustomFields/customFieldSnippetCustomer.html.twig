@@ -189,7 +189,7 @@
                 self = this;
 
                 $.ajax({
-                    url: "{{ path('helpdesk_ticket_custom_fields_decrypt_xhr', {ticketId: ticket.id}) }}",
+                    url: "{{ path('uvdesk_form_component_ticket_custom_fields_decrypt_xhr', {ticketId: ticket.id}) }}",
                     data: $.extend({}, this.options.ticketCustomField, {'area': 'customer'}),
                     method: 'POST',
                     success: function(response) {
@@ -322,7 +322,7 @@
                     }
 
                     $.ajax({
-                        url: "{{ path('helpdesk_ticket_custom_fields_xhr') }}",
+                        url: "{{ path('uvdesk_form_component_ticket_custom_fields_xhr') }}",
                         data: submissionData,
                         cache: false,
                         contentType: false,
