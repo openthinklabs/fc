@@ -100,7 +100,7 @@ class FormBuilderController extends BaseController
 
     public function updateFormConfigurations($id , Request $request)
     {
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $form =  $em->getRepository('UVDeskFormComponentPackage:Form')->find($id);
         $data = [
             'id' => $form->getId(),
@@ -183,7 +183,7 @@ class FormBuilderController extends BaseController
     
         if($request->getMethod() == 'POST')
         {
-            $em = $this->getDoctrine()->getEntityManager();
+            $em = $this->getDoctrine()->getManager();
             $form = $em->getRepository('UVDeskFormComponentPackage:Form')->find($id);
 
             $formName = (empty($request->request->get('form_name')) == true ? "No Form Name Given" : $request->request->get('form_name'));
@@ -234,7 +234,7 @@ class FormBuilderController extends BaseController
 
     public function loadFormsXHR(Request $request)
     {
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $records = $em->getRepository("UVDesk\CommunityPackages\UVDesk\FormComponent\Entity\Form")->findAll();
         $arrayOfForms = [];
         foreach($records as $k=>$v)
@@ -254,7 +254,7 @@ class FormBuilderController extends BaseController
 
     public function removeFormConfiguration($id, Request $request)
     {
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $form = $em->getRepository('UVDeskFormComponentPackage:Form')->find($id);
         $em->remove($form);
         $em->flush();  
@@ -267,7 +267,7 @@ class FormBuilderController extends BaseController
  
     public function previewForm($id, Request $request, FileUploadService $fileUploadService , CustomFieldsService $customFieldsService )
     {
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $form = $em->getRepository('UVDeskFormComponentPackage:Form')->find($id);
 
         $data = [
