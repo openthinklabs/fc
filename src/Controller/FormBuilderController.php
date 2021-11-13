@@ -29,7 +29,7 @@ class FormBuilderController extends BaseController
 
     public function createFormBuilderConfiguration(Request $request)
     {
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $customFields =  $em->getRepository('UVDeskFormComponentPackage:CustomFields')->findAll();
         $customFieldsArray = [];
 
@@ -58,7 +58,7 @@ class FormBuilderController extends BaseController
         if($request->getMethod() == 'POST')
         {
   
-            $entityManager = $this->getDoctrine()->getEntityManager();
+            $entityManager = $this->getDoctrine()->getManager();
 
             $form = new Form(); 
             $form->setFormName($request->request->get('form_name')); 
