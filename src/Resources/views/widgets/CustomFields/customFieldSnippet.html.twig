@@ -291,8 +291,8 @@
         var CustomFieldCollectionView = Backbone.View.extend({
             el : $("#uv-customfield-view"),
             collectionEl: $('#customFieldCollection'),
-            ticketCustomFieldCollection: $.parseJSON("{{ ticketCustomFieldCollection|json_encode|addslashes|raw }}"),
-            customFieldCollection: new CustomFieldCollection($.parseJSON('{{ customFieldCollection|json_encode|addslashes|raw }}')),
+            ticketCustomFieldCollection: $.parseJSON("{{ ticketCustomFieldCollection|json_encode|e('js')|raw }}"),
+            customFieldCollection: new CustomFieldCollection($.parseJSON("{{ customFieldCollection|json_encode|e('js')|raw }}")),
             events : {
                 'click .cfield-manage-pta': 'manageCustomField',
                 'submit form[name="customFieldForm"]': 'handleFormSubmission',
